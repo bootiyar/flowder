@@ -27,7 +27,7 @@ class Flowder {
     try {
       // ignore: cancel_subscriptions
       final t = await initDownload(url, options);
-      return DownloaderCore(t.subscription, options, url);
+      return DownloaderCore(t.subscription,t.sink, options, url);
     } catch (e) {
       rethrow;
     }
