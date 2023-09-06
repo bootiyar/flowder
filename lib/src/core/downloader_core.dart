@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flowder/src/flowder.dart';
 import 'package:flowder/src/utils/constants.dart';
@@ -9,6 +10,7 @@ import 'package:flowder/src/utils/downloader_utils.dart';
 class DownloaderCore {
   /// StreamSubscription used to link with the download streaming.
   late StreamSubscription _inner;
+  RandomAccessFile? sink;
 
   /// Inner utils
   late final DownloaderUtils _options;
@@ -35,7 +37,9 @@ class DownloaderCore {
   Future<void> resume() async {
     _isActive();
     if (isDownloading) return;
-    _inner = await Flowder.initDownload(_url, _options);
+    Test t = await Flowder.initDownload(_url, _options);
+    _inner = t.subscription;
+    sink = t.sink;
   }
 
   /// Cancel any current download, even if the download is [pause]
@@ -43,6 +47,7 @@ class DownloaderCore {
     _isActive();
     await _inner.cancel();
     await _options.progress.resetProgress(_url);
+    await sink?.close();
     if (_options.deleteOnCancel) {
       await _options.file.delete();
     }
@@ -60,8 +65,8 @@ class DownloaderCore {
   Future<DownloaderCore> download(String url, DownloaderUtils options) async {
     try {
       // ignore: cancel_subscriptions
-      final subscription = await Flowder.initDownload(url, options);
-      return DownloaderCore(subscription, options, url);
+      final t = await Flowder.initDownload(url, options);
+      return DownloaderCore(t.subscription, options, url);
     } catch (e) {
       rethrow;
     }

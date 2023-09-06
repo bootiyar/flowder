@@ -1,6 +1,6 @@
 # Flowder
 
-Handle your file downloads status in a more simple and easy way :heartbeat:
+For Personal use only, It's forked from https://github.com/Crdzbird/flowder\ Handle your file downloads status in a more simple and easy way 💓
 
   
 

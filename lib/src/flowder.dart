@@ -26,16 +26,16 @@ class Flowder {
       String url, DownloaderUtils options) async {
     try {
       // ignore: cancel_subscriptions
-      final subscription = await initDownload(url, options);
-      return DownloaderCore(subscription, options, url);
+      final t = await initDownload(url, options);
+      return DownloaderCore(t.subscription, options, url);
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Init a new Download, however this returns a [StreamSubscription]
+  /// Init a new Download, however this returns a [Test]
   /// use at your own risk.
-  static Future<StreamSubscription> initDownload(
+  static Future<Test> initDownload(
       String url, DownloaderUtils options) async {
     var lastProgress = await options.progress.getProgress(url);
     final client = options.client ?? Dio(BaseOptions(sendTimeout: 60));
@@ -71,9 +71,15 @@ class Flowder {
         },
         onError: (error) async => subscription!.pause(),
       );
-      return subscription!;
+      return Test(subscription!, sink);
     } catch (e) {
       rethrow;
     }
   }
+}
+class Test{
+  StreamSubscription<dynamic> subscription;
+  RandomAccessFile sink;
+
+  Test(this.subscription,this.sink);
 }
