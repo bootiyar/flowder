@@ -61,6 +61,11 @@ class DownloaderCore {
     if (isCancelled) throw StateError('Already cancelled');
   }
 
+  /// Check if the download was cancelled.
+  RandomAccessFile? getRandomAccessFile() {
+    return Flowder.randomAccessFile;
+  }
+
   /// Start a new [download] however, this download can only be access through
   /// [DownloaderCore]
   Future<DownloaderCore> download(String url, DownloaderUtils options) async {

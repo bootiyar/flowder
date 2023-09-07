@@ -20,6 +20,8 @@ typedef ProgressCallback = void Function(int count, int total);
 /// - Flowder.download: Returns an instance of [DownloaderCore]
 /// - Flowder.initDownload -> this used at your own risk.
 class Flowder {
+
+  static RandomAccessFile? randomAccessFile;
   /// Start a new Download progress.
   /// Returns a [DownloaderCore]
   static Future<DownloaderCore> download(
@@ -53,11 +55,11 @@ class Flowder {
       final _total = int.tryParse(
               response.headers.value(HttpHeaders.contentLengthHeader)!) ??
           0;
-      final sink = await file.open(mode: FileMode.writeOnlyAppend);
+      randomAccessFile = await file.open(mode: FileMode.writeOnlyAppend);
       subscription = response.data.stream.listen(
         (Uint8List data) async {
           subscription!.pause();
-          await sink.writeFrom(data);
+          await randomAccessFile?.writeFrom(data);
           final currentProgress = lastProgress + data.length;
           await options.progress.setProgress(url, currentProgress.toInt());
           options.progressCallback.call(currentProgress, _total);
@@ -66,12 +68,12 @@ class Flowder {
         },
         onDone: () async {
           options.onDone.call();
-          await sink.close();
+          await randomAccessFile?.close();
           if (options.client != null) client.close();
         },
         onError: (error) async => subscription!.pause(),
       );
-      return Test(subscription!, sink);
+      return Test(subscription!, randomAccessFile!);
     } catch (e) {
       rethrow;
     }
